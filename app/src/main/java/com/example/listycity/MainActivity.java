@@ -1,27 +1,31 @@
 package com.example.listycity;
 
 import android.os.Bundle;
-import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.ArrayList;
+
+public class MainActivity extends AppCompatActivity implements AddCityFragment.AddCityDialogListener {
 
     ListView cityList;
-    EditText cityInput;
-    Button btnAddCity, btnDeleteCity, btnConfirm;
+    Button btnAddCity, btnDeleteCity;
 
-    ArrayList<String> dataList;
-    ArrayAdapter<String> cityAdapter;
+    ArrayList<City> dataList;
+    CityArrayAdapter cityAdapter;
 
     int selectedIndex = -1;
+
+    @Override
+    public void addCity(City city) {
+        // called from AddCityFragment dialog
+        dataList.add(city);
+        cityAdapter.notifyDataSetChanged();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,54 +33,25 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         cityList = findViewById(R.id.city_list);
-        cityInput = findViewById(R.id.city_input);
-        btnAddCity = findViewById(R.id.btn_add_city);
-        btnDeleteCity = findViewById(R.id.btn_delete_city);
-        btnConfirm = findViewById(R.id.btn_confirm);
 
-        String[] cities = {
-                "Edmonton", "Vancouver", "Moscow",
-                "Sydney", "Berlin", "Vienna"
-        };
+        String[] cities = { "Edmonton", "Vancouver", "Toronto" };
+        String[] provinces = { "AB", "BC", "ON" };
 
-        dataList = new ArrayList<>(Arrays.asList(cities));
+        dataList = new ArrayList<>();
+        for (int i = 0; i < cities.length; i++) {
+            dataList.add(new City(cities[i], provinces[i]));
+        }
 
-        cityAdapter = new ArrayAdapter<>(
-                this,
-                R.layout.content,
-                dataList
-        );
-
+        cityAdapter = new CityArrayAdapter(this, dataList);
         cityList.setAdapter(cityAdapter);
 
-        cityList.setOnItemClickListener((parent, view, position, id) -> {
-            selectedIndex = position;
-        });
+        // THIS is the step manual is asking
+        FloatingActionButton fab = findViewById(R.id.button_add_city);
 
-        btnAddCity.setOnClickListener(v -> {
-            cityInput.setVisibility(View.VISIBLE);
-            btnConfirm.setVisibility(View.VISIBLE);
-        });
-
-        btnConfirm.setOnClickListener(v -> {
-            String newCity = cityInput.getText().toString();
-
-            if (!newCity.isEmpty()) {
-                dataList.add(newCity);
-                cityAdapter.notifyDataSetChanged();
-                cityInput.setText("");
-            }
-
-            cityInput.setVisibility(View.GONE);
-            btnConfirm.setVisibility(View.GONE);
-        });
-
-        btnDeleteCity.setOnClickListener(v -> {
-            if (selectedIndex != -1) {
-                dataList.remove(selectedIndex);
-                cityAdapter.notifyDataSetChanged();
-                selectedIndex = -1;
-            }
+        fab.setOnClickListener(v -> {
+            new AddCityFragment().show(getSupportFragmentManager(), "Add City");
         });
     }
+
 }
+
