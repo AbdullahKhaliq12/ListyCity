@@ -7,12 +7,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-
-import com.example.listycity.City;
 
 public class AddCityFragment extends DialogFragment {
 
@@ -32,6 +31,7 @@ public class AddCityFragment extends DialogFragment {
             throw new RuntimeException(context + " must implement AddCityDialogListener");
         }
     }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
@@ -50,12 +50,16 @@ public class AddCityFragment extends DialogFragment {
                 .setNegativeButton("Cancel", null)
                 .setPositiveButton("Add", (dialog, which) -> {
 
-                    String cityName = editCityName.getText().toString();
-                    String provinceName = editProvinceName.getText().toString();
+                    String cityName = editCityName.getText().toString().trim();
+                    String provinceName = editProvinceName.getText().toString().trim();
+
+                    if (cityName.isEmpty() || provinceName.isEmpty()) {
+                        Toast.makeText(getContext(), "Please enter both city and province", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
                     listener.addCity(new City(cityName, provinceName));
                 })
                 .create();
     }
-
 }
